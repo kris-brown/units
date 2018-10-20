@@ -1,8 +1,12 @@
-from units.units import m,s,J,kg,K,UnitVal,Temp,Energy
+from units.unit         import m,s,J,kg,K
+from units.datatypes    import UnitVal
+from units.constructor  import Temp,Energy
+###############################################################################
 def test()->None:
     ######################
     # Example arithmatic #
     ######################
+
     len1    = 100 * m
     len2    = 10 * m
     time1   = 1 * s
@@ -23,8 +27,9 @@ def test()->None:
     except Exception as e:
         print(e)
 
-    # "Safe constructor" examples
-
+    ###############################
+    # "Safe constructor" examples #
+    ###############################
     def doThermo1(t:UnitVal)->UnitVal:
         '''
         It's a function and we really know it's only valid if arg is a temperature
@@ -46,14 +51,11 @@ def test()->None:
         boltzmann = 1.38e-23 * J / K
         return Energy(t * boltzmann)
 
-    def energyThing(e:Energy)->None:
-        '''and also make a guarantee about the output unit type'''
-        print('The ENERGY is ',e)
 
     temp1 = Temp(100 * K)
 
     doThermo1(len1)       # no TYPE ERROR, because we were LAZY
-    doThermo2(len1)       # causes mypy TYPE ERROR
+    doThermo2(len1)       # type: ignore # <------ type error
 
     try:
         Temp(len1) # cannot wrap a non-temperature in Temp()
@@ -62,7 +64,10 @@ def test()->None:
 
     doThermo2(temp1)      # typechecks, no runtime error
 
-    energyThing(doThermo2(temp1)) # type error
+    def energyThing(e:Energy)->None:
+        print('The ENERGY is ',e)
+
+    energyThing(doThermo2(temp1)) # type: ignore # <----- type error
     energyThing(doThermo3(temp1)) # no type error
     import pdb;pdb.set_trace()
 
