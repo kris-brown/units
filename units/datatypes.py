@@ -5,7 +5,8 @@ Num   = U[float,int]
 ################################################################################
 
 class Unit(object):
-    """SI-derived units expressible as constant multiplicative
+    """
+    SI-derived units expressible as constant multiplicative
         and (then) additive factors for some product of base units
     """
     def __init__(self,
@@ -19,7 +20,7 @@ class Unit(object):
         self._offset = offset
         self._bases  = bases
 
-    def __eq__(self,other:object)->bool:
+    def __eq__(self, other : object) -> bool:
         """
         Important: labels don't matter for equality
         """
@@ -101,6 +102,9 @@ class Unit(object):
         return Unit(label,self.bases)
 
     def stdLabel(self)->'Unit':
+        '''
+        Create a "name" for this unit, using only the SIBase information
+        '''
         basedict  = {pow:k.value for k,pow in self.bases.items() if pow !=0}
         strbases  = reversed(sorted(basedict.items()))
         n = '·'.join([b+('^%s'%(pow) if pow!=1 else '') for pow,b in strbases])
@@ -146,7 +150,7 @@ class UnitVal(object):
     A value accompanied by a unit
     Most places where we typically use floats should be replaced with this
     """
-    def __init__(self,val:float=1.0,unit:O[Unit] = None)->None:
+    def __init__(self, val : float =1.0, unit : O[Unit] = None) -> None:
         unit_ = unit or Unit()
         self.val=val; self.unit= unit_
 
@@ -178,27 +182,27 @@ class UnitVal(object):
         val,unit = (u.val,u.unit) if isinstance(u,UnitVal) else (1,u)
         return UnitVal(val = self.val / val, unit = self.unit/unit)
 
-    def __float__(self)->float:
+    def __float__(self) -> float:
         """Cast unitval into a unitless floating number - throws error if has units"""
         uerr = 'Cannot cast into unitless number: %s'%self.unit
         assert all([x == 0 for x in self.unit.bases.values()]), uerr
         return self.val
 
-    def __int__(self)->int:
+    def __int__(self) -> int:
         """Cast unitval into an integer - throws error if has units"""
         uerr = 'Cannot cast into unitless number: %s'%self.unit
         assert all([x == 0 for x in self.unit.bases.values()]), uerr
         assert int(self.val) == self.val, 'Cannot cast to integer! %s'%self.val
         return int(self.val)
 
-    def toUnit(self,label:str) -> Unit:
+    def toUnit(self, label : str) -> Unit:
         """
         Create a unit out of a UnitVal.
         yard = (1.05 * m).unit() means there are 1.05 meters in a yard
         """
         return Unit(label=label,bases=self.unit.bases,factor=self.unit.factor * self.val)
 
-    def to(self,u_:O[Unit]=None)->'UnitVal':
+    def to(self, u_: O[Unit] = None) -> 'UnitVal':
         """
         Convert from one unit to another of the same type.
         If none specified, then converts to SI units
